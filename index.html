@@ -1,57 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>抽签系统</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <input type="text" id="school">
-    <button onclick="draw()">抽签</button>
-    <div id="result"></div>
+    <div class="container">
+        <h1>学校抽签系统</h1>
+        <div class="input-group">
+            <input type="text" id="school" placeholder="请输入学校名称">
+        </div>
+        <button onclick="draw()">抽签</button>
+        <div id="result"></div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // 配置Supabase
+        // 初始化Supabase客户端
         const supabase = createClient(
-            "https://xxx.supabase.co", 
-            "your-anon-key"
+            'https://xxxxxxxxxxxxx.supabase.co', // 你的项目URL
+            'your-anon-key' // 你的匿名密钥
         );
 
         async function draw() {
-            const school = document.getElementById('school').value;
+            const school = document.getElementById('school').value.trim();
             
-            // Step1: 检查是否已存在记录
-            const { data: existing } = await supabase
-                .from('draws')
-                .select()
-                .eq('school', school);
-
-            if (existing.length > 0) {
-                alert("该学校已抽签！");
+            if (!school) {
+                alert("请输入学校名称！");
                 return;
             }
 
-            // Step2: 获取可用号码
-            const { data: usedNumbers } = await supabase
-                .from('draws')
-                .select('number');
+            try {
+                // 检查该学校是否已经抽过号码
+                const { data: existing } = await supabase
+                    .from('draws')
+                    .select()
+                    .eq('school', school);
 
-            const max = 6;
-            const available = Array.from({length: max}, (_,i) => i+1)
-                                 .filter(n => !usedNumbers.some(u => u.number === n));
+                if (existing.length > 0) {
+                    alert("该学校已抽过号码！");
+                    return;
+                }
 
-            if (available.length === 0) {
-                alert("号码已抽完！");
-                return;
+                // 获取所有已抽过的号码
+                const { data: usedNumbers } = await supabase
+                    .from('draws')
+                    .select('number');
+
+                // 生成可用号码列表
+                const max = 6; // 最大号码
+                const used = new Set(usedNumbers.map(u => u.number));
+                const available = [];
+                for (let i = 1; i <= max; i++) {
+                    if (!used.has(i)) {
+                        available.push(i);
+                    }
+                }
+
+                if (available.length === 0) {
+                    alert("号码已抽完！");
+                    return;
+                }
+
+                // 随机分配一个号码
+                const assigned = available[Math.floor(Math.random() * available.length)];
+
+                // 将抽中的号码存入数据库
+                const { data, error } = await supabase
+                    .from('draws')
+                    .insert([{ school, number: assigned }]);
+
+                if (error) {
+                    throw error;
+                }
+
+                document.getElementById('result').innerText = `抽中号码：${assigned}`;
+            } catch (error) {
+                console.error('抽签失败:', error);
+                alert('抽签失败，请检查网络连接或联系管理员。');
             }
-
-            // Step3: 分配号码并存储到数据库
-            const assigned = available[Math.floor(Math.random()*available.length)];
-            
-            await supabase
-                .from('draws')
-                .insert([{ school, number: assigned }]);
-
-            document.getElementById('result').innerText = `抽中号码：${assigned}`;
         }
     </script>
 </body>
