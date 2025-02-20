@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学校抽签系统</title>
+    <title>抽签系统</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -54,7 +54,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>学校抽签系统</h1>
+        <h1>抽签系统</h1>
         <div class="input-group">
             <input type="text" id="school" placeholder="请输入学校名称">
         </div>
@@ -66,8 +66,8 @@
     <script>
         // 初始化Supabase客户端
         const supabase = createClient(
-            'https://xxxxxxxxxxxxx.supabase.co', // 你的项目URL
-            'your-anon-key' // 你的匿名密钥
+            'https://zyluekqkenczsspdccad.supabase.co', // 你的项目URL
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5bHVla3FrZW5jenNzcGRjY2FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMzcxNjcsImV4cCI6MjA1NTYxMzE2N30.5bPeSxJVvcnuLQDT7iJsCLn-8t-Nw_HY1JxD-ie97yQ' // 你的匿名密钥
         );
 
         async function draw() {
