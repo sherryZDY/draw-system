@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>抽签系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <input type="text" id="school">
+    <button onclick="draw()">抽签</button>
+    <div id="result"></div>
+
+    <script>
+        // 配置Supabase
+        const supabase = createClient(
+            "https://xxx.supabase.co", 
+            "your-anon-key"
+        );
+
+        async function draw() {
+            const school = document.getElementById('school').value;
+            
+            // Step1: 检查是否已存在记录
+            const { data: existing } = await supabase
+                .from('draws')
+                .select()
+                .eq('school', school);
+
+            if (existing.length > 0) {
+                alert("该学校已抽签！");
+                return;
+            }
+
+            // Step2: 获取可用号码
+            const { data: usedNumbers } = await supabase
+                .from('draws')
+                .select('number');
+
+            const max = 6;
+            const available = Array.from({length: max}, (_,i) => i+1)
+                                 .filter(n => !usedNumbers.some(u => u.number === n));
+
+            if (available.length === 0) {
+                alert("号码已抽完！");
+                return;
+            }
+
+            // Step3: 分配号码并存储到数据库
+            const assigned = available[Math.floor(Math.random()*available.length)];
+            
+            await supabase
+                .from('draws')
+                .insert([{ school, number: assigned }]);
+
+            document.getElementById('result').innerText = `抽中号码：${assigned}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>抽签结果管理</title>
+    <style>
+        body { font-family: Arial; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>抽签结果管理</h1>
+    <table id="resultsTable">
+        <tr>
+            <th>学校名称</th>
+            <th>号码</th>
+        </tr>
+    </table>
+
+    <script>
+        // 加载抽签结果
+        let schoolsData = JSON.parse(localStorage.getItem('schools')) || {};
+
+        // 填充表格
+        const tableBody = document.getElementById('resultsTable').tbody;
+        for (const school in schoolsData) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${schoolsData[school].school}</td>
+                <td>${schoolsData[school].number}</td>
+            `;
+            tableBody.appendChild(row);
+        }
+    </script>
+</body>
+</html>
